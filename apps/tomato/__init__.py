@@ -68,11 +68,35 @@ class Tomato(object):
 
         self.btn_pos = ((CX - 8), screen.height - 18)
 
+        # "timer" (default) or "tasks"; UP shows the task count, DOWN returns to the timer
+        self.page = "timer"
+
+    def tasks_done(self):
+        # Completed tasks, plus the current one if a task is underway
+        current = 1 if self.running and not self.is_break_time else 0
+        return self.tasks_complete + current
+
     def draw(self):
 
         # Clear the screen
         screen.pen = color.black
         screen.clear()
+
+        if self.page == "tasks":
+            self.draw_tasks()
+        else:
+            self.draw_timer()
+
+    def draw_tasks(self):
+        _, y = self.btn_pos
+
+        screen.pen = self.foreground
+        screen.font = large_font
+        center_text(str(self.tasks_done()), -2)
+        screen.font = small_font
+        center_text("tasks", y + 3)
+
+    def draw_timer(self):
 
         # unpack the button position
         x, y = self.btn_pos
@@ -179,7 +203,13 @@ def on_exit():
 def update():
     global timer, scroll
 
-    if badge.pressed(BUTTON_B):
+    if badge.pressed(BUTTON_UP):
+        scroll = None
+        timer.page = "tasks"
+    elif badge.pressed(BUTTON_DOWN):
+        scroll = None
+        timer.page = "timer"
+    elif badge.pressed(BUTTON_B) and timer.page == "timer":
         scroll = None
         timer.run()
     timer.draw()
