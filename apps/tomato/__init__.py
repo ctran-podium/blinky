@@ -49,8 +49,9 @@ class Tomato(object):
         # Time constants.
         # Feel free to change these to ones that work better for you.
         self.TASK = 25 * 60
-        self.SHORT = 10 * 60
-        self.LONG = 30 * 60
+        self.SHORT = 5 * 60
+        self.LONG = 15 * 60
+        self.TASKS_PER_CYCLE = 4
 
         # How long the completion alert should be played (seconds)
         self.alert_duration = 5
@@ -104,10 +105,10 @@ class Tomato(object):
 
         if self.is_break_time:
             self.background = color.white
-            if self.tasks_complete < 4:
-                self.current_timer = self.SHORT
-            else:
+            if self.tasks_complete % self.TASKS_PER_CYCLE == 0:
                 self.current_timer = self.LONG
+            else:
+                self.current_timer = self.SHORT
         else:
             self.current_timer = self.TASK
             self.background = color.black
@@ -153,10 +154,7 @@ class Tomato(object):
                 self.running = False
                 self.alert_start_time = time.time()
                 if not self.is_break_time:
-                    if self.tasks_complete < 4:
-                        self.tasks_complete += 1
-                    else:
-                        self.tasks_complete = 0
+                    self.tasks_complete += 1
                 self.is_break_time = not self.is_break_time
         else:
             # restore the backlight to default brightness
